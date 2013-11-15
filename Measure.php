@@ -19,10 +19,10 @@ final class Measure
     /**
      * 
      * @param callable $function A function to be measured
-     * @param mixed $args Parameters to be passed for measured function
+     * @param array $args Parameters to be passed for measured function
      * @return array Result currently contains one value: used memory space
      */
-    public function benchmarkMemory(callable $function, $args=null)
+    public function benchmarkMemory(callable $function, $args=[])
     {
        declare(ticks=1);
        $this->memory = memory_get_usage();
