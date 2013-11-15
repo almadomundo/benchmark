@@ -29,9 +29,7 @@ final class Measure
        $this->max    = 0;
 
        register_tick_function('call_user_func', [$this, 'memoryTick']);
-       $result = is_array($args)?
-                 call_user_func_array($function, $args):
-                 call_user_func($function);
+       $this->measureFunction($function, $args, 1);
        unregister_tick_function('call_user_func');
        return [
           self::MEMORY_VALUE => $this->max
