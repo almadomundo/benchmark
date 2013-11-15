@@ -22,7 +22,7 @@ final class Measure
      * @param array $args Parameters to be passed for measured function
      * @return array Result currently contains one value: used memory space
      */
-    public function benchmarkMemory(callable $function, $args=[])
+    public function benchmarkMemory(callable $function, array $args=[])
     {
        declare(ticks=1);
        $this->memory = memory_get_usage();
