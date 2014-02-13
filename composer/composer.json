@@ -1,0 +1,8 @@
+{
+    "name": "almadomundo/benchmark",
+    "description": "Relative memory & time benchmarking in PHP for PHP",
+    "require": {
+        "php": ">=5.3.0",
+        "another-vendor/package": "1.*"
+    }
+}

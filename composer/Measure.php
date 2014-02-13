@@ -8,7 +8,7 @@ final class Measure
     const BENCHMARK_AVERAGE = 2;
     const BENCHMARK_COUNT   = 3;
     
-    private $max, $memory;
+    private $max, $memory, $trace;
 
     public function memoryTick()
     {
@@ -16,24 +16,49 @@ final class Measure
        $this->max    = $this->memory>$this->max?$this->memory:$this->max;
        $this->memory = memory_get_usage();
     }
+    
+    public function profileTick()
+    {
+        $memory = memory_get_usage();
+        $this->trace[] = $memory-$this->memory;
+        $this->memory = memory_get_usage();
+    }
+    /**
+     * 
+     * @param callable $function A function to be measured
+     * @param array $args Parameters to be passed for measured function
+     * @return array Result contains profile data per each line
+     */
+    public function profileMemory(callable $function, array $args=array())
+    {
+       declare(ticks=1);
+       $this->memory    = memory_get_usage();
+       $this->max       = 0;
+       $this->trace     = array();
+
+       register_tick_function('call_user_func', array($this, 'profileTick'));
+       $this->measureFunction($function, $args, 1);
+       unregister_tick_function('call_user_func');
+       return $this->trace;
+    }
     /**
      * 
      * @param callable $function A function to be measured
      * @param array $args Parameters to be passed for measured function
      * @return array Result currently contains one value: used memory space
      */
-    public function benchmarkMemory(callable $function, array $args=[])
+    public function benchmarkMemory(callable $function, array $args=array())
     {
        declare(ticks=1);
-       $this->memory = memory_get_usage();
-       $this->max    = 0;
+       $this->memory    = memory_get_usage();
+       $this->max       = 0;
 
-       register_tick_function('call_user_func', [$this, 'memoryTick']);
+       register_tick_function('call_user_func', array($this, 'memoryTick'));
        $this->measureFunction($function, $args, 1);
        unregister_tick_function('call_user_func');
-       return [
+       return array(
           self::MEMORY_VALUE => $this->max
-       ];
+       );
     }
     /**
      * 
@@ -43,9 +68,9 @@ final class Measure
      * @return array Result currently contains: total time, average time and measurements count
      * @throws \InvalidArgumentException If measurements count is invalid
      */
-    public function benchmarkTime(callable $function, array $args=[], $count=1)
+    public function benchmarkTime(callable $function, array $args=array(), $count=1)
     {
-        return $this->benchmarkCustom('microtime', $function, [1], $args, $count);
+        return $this->benchmarkCustom('microtime', $function, array(1), $args, $count);
     }
     /**
      * 
@@ -58,7 +83,7 @@ final class Measure
      * @throws \InvalidArgumentException If measurements count is invalid
      * @throws \LogicException If measurement function did not returned numeric value
      */
-    public function benchmarkCustom(callable $benchmark, callable $function, array $benchmarkArgs=[], array $functionArgs=[], $count=1)
+    public function benchmarkCustom(callable $benchmark, callable $function, array $benchmarkArgs=array(), array $functionArgs=array(), $count=1)
     {
         if(!is_int($count) || $count <=0)
         {
@@ -71,18 +96,18 @@ final class Measure
         }
         $this->measureFunction($function, $functionArgs, $count);
         $end    = call_user_func_array($benchmark, $benchmarkArgs);
-        return [
+        return array(
             self::BENCHMARK_VALUE    => $end - $init,
             self::BENCHMARK_AVERAGE  => ($end - $init) / $count,
             self::BENCHMARK_COUNT    => $count
-        ];
+        );
     }
     
     private function measureFunction($function, $args, $count)
     {
         for($i=0; $i<$count; $i++)
         {
-            $result = call_user_func_array($function, $args);
+            call_user_func_array($function, $args);
         }
     }
 }
