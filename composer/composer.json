@@ -1,6 +1,15 @@
 {
     "name": "almadomundo/benchmark",
     "description": "Relative memory & time benchmarking in PHP for PHP",
+    "authors": [
+        {
+            "name": "Eugene Belov",
+            "email": "eugen.alter@gmail.com",
+            "homepage": "http://github.com/almadomundo",
+            "role": "Developer"
+        }
+    ],
+    "license": "GPLv2",
     "require": {
         "php": ">=5.3.0",
         "another-vendor/package": "1.*"
