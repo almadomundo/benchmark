@@ -11,7 +11,6 @@
     ],
     "license": "GPLv2",
     "require": {
-        "php": ">=5.3.0",
-        "another-vendor/package": "1.*"
+        "php": ">=5.3.0"
     }
 }
