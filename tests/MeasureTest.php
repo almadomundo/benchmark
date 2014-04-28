@@ -2,7 +2,7 @@
 require_once(__DIR__.'/../autoload.php');
 
 class MeasureTest extends PHPUnit_Framework_TestCase 
-{
+{   
     //check if obligatory keys exist:
     public function testBenchmarkTimeExistingKeys() 
     {
@@ -62,6 +62,34 @@ class MeasureTest extends PHPUnit_Framework_TestCase
         $result     = $measure->benchmarkMemory('mt_rand');
         $this->assertTrue(
                 array_diff_key($result, array_flip($keys))==[]
+        );
+    }
+    
+    //logic: return values
+    public function testBenchmarkTimePositiveResult()
+    {
+        set_time_limit(0);
+        
+        $measure    = new \Benchmark\Measure;
+        $count      = (int)1E6;
+        $result     = $measure->benchmarkTime('mt_rand', [], $count);
+        $this->assertTrue($result[\Benchmark\Measure::BENCHMARK_VALUE]>0);
+        $this->assertTrue($result[\Benchmark\Measure::BENCHMARK_AVERAGE]>0);
+        $this->assertTrue($result[\Benchmark\Measure::BENCHMARK_COUNT]>0);
+    }
+    
+    public function testBenchmarkTimeContinuous()
+    {
+        set_time_limit(0);
+        
+        $measure    = new \Benchmark\Measure;
+        $count      = (int)1E6;
+        $one        = $measure->benchmarkTime('mt_rand', [], $count);
+        $two        = $measure->benchmarkTime('mt_rand', [], (int)($count/10));
+        $this->assertTrue(
+                $one[\Benchmark\Measure::BENCHMARK_VALUE]
+                >
+                $two[\Benchmark\Measure::BENCHMARK_VALUE]
         );
     }
     
