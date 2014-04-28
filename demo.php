@@ -1,36 +1,31 @@
 <?php
-spl_autoload_register(function($className)
-{
-    $path = explode('\\', $className);
-    include_once(end($path).'.php');
-});
+require_once(__DIR__.'/autoload.php');
 
-
-class Foo
+function parsePlain($string, $valueDelim=':', $groupDelim=',')
 {
-    public function baz($string, $prefix='')
+    $result = [];
+    foreach(explode($groupDelim, $string) as $value)
     {
-        $result = $prefix.strrev($string);
-        return $result;
+        $value = explode($valueDelim, $value);
+        $result[$value[0]] = $value[1];
     }
-    
-    public function bar()
-    {
-        $tmp  = str_repeat('test', 1E4);
-        $tmp  = $this->baz($tmp);
-        $data = preg_split('//', $tmp);
-        return $data;
-    }
+    return $result;
 }
+
+function parseRegex($string, $valueDelim=':', $groupDelim=',')
+{
+    preg_match_all('/([^'.$groupDelim.']+)'.$valueDelim.'([^'.$groupDelim.']+)/', $string, $matches);
+    return array_combine($matches[1], $matches[2]);
+}
+
+set_time_limit(0);
+
 $measure    = new \Benchmark\Measure;
-/*
-$result     = $measure->benchmarkMemory('str_repeat', ['test', 1E4]);
-var_dump($result);
-$result     = $measure->benchmarkMemory('str_repeat', ['test', 1E3]);
-var_dump($result);
-$result     = $measure->benchmarkTime('uniqid', [1], 1000);
-var_dump($result);
-*/
-$obj = new Foo();
-$result     = $measure->profileMemory([$obj, 'bar']);
-var_dump($result);
+$string     = join(',', array_map(function($x)
+{
+    return 'val'.mt_rand(1, 1E6).':'.mt_rand(1, 1E6);
+}, range(1, 1E3)));
+
+$x          = $measure->benchmarkTime('parsePlain', [$string], (int)1E4);
+$y          = $measure->benchmarkTime('parseRegex', [$string], (int)1E4);
+var_dump($x, $y);
